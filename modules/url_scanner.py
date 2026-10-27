@@ -1,70 +1,83 @@
 
-from urllib.parse import urlparse
-import ipaddress
 import re
+from urllib.parse import urlparse
 
 def scan_url(url):
     url = url.strip()
+    text = url.lower()
+    score = 0
     reasons = []
 
     if not url:
         return {
-            "risk": "Unknown",
+            "risk": "Low",
             "score": 0,
-            "reasons": ["Please enter a URL."]
+            "reasons": ["Please enter a URL to scan"]
         }
 
-    candidate = url if "://" in url else "https://" + url
+    # Add a scheme so URLs such as example.com can be parsed
+    parsed = urlparse(url if "://" in url else "https://" + url)
+    host = (parsed.hostname or "").lower()
+    path = parsed.path.lower()
 
-    try:
-        parsed = urlparse(candidate)
-        host = parsed.hostname
+    # 1. IP address used instead of a domain name
+    if re.fullmatch(r"(?:\d{1,3}\.){3}\d{1,3}", host):
+        score += 3
+        reasons.append("URL uses an IP address instead of a domain name")
 
-        if parsed.scheme not in ("http", "https") or not host:
-            raise ValueError("Invalid URL")
+    # 2. Suspicious URL characters
+    if "@" in url:
+        score += 3
+        reasons.append("URL contains @, which can obscure the destination")
 
-    except ValueError:
-        return {
-            "risk": "Unknown",
-            "score": 0,
-            "reasons": ["URL format is invalid."]
-        }
-
-    score = 0
-    host = host.lower()
-
-    if parsed.scheme == "http":
+    # 3. HTTPS is absent
+    if not url.lower().startswith("https://"):
         score += 1
-        reasons.append("Connection does not use HTTPS.")
+        reasons.append("URL does not explicitly use HTTPS")
 
-    if "@" in parsed.netloc:
-        score += 2
-        reasons.append("URL contains an @ symbol in its address section.")
+    # 4. Commonly suspicious words in the URL
+    suspicious_words = [
+        "login", "verify", "secure", "account",
+        "update", "password", "otp", "wallet",
+        "banking", "payment", "claim", "prize"
+    ]
 
-    try:
-        ipaddress.ip_address(host)
-        score += 2
-        reasons.append("URL uses a direct IP address instead of a domain.")
-    except ValueError:
-        pass
-
-    if "xn--" in host:
-        score += 2
-        reasons.append("Domain contains an encoded internationalized name.")
-
-    if len(url) > 120:
+    found_words = [word for word in suspicious_words if word in text]
+    if len(found_words) >= 3:
+        score += 3
+        reasons.append("Several sensitive or urgency-related words appear in the URL")
+    elif len(found_words) >= 1:
         score += 1
-        reasons.append("URL is unusually long.")
+        reasons.append("URL contains a sensitive or account-related word")
 
+    # 5. URL shorteners
+    shorteners = [
+        "bit.ly", "tinyurl.com", "t.co",
+        "is.gd", "cutt.ly", "shorturl.at"
+    ]
+
+    if any(host == domain or host.endswith("." + domain)
+           for domain in shorteners):
+        score += 2
+        reasons.append("URL uses a link-shortening service")
+
+    # 6. Unusually long URL
+    if len(url) > 100:
+        score += 2
+        reasons.append("URL is unusually long")
+
+    # 7. Multiple subdomains
     if len(host.split(".")) >= 5:
-        score += 1
-        reasons.append("Domain has many subdomain levels.")
+        score += 2
+        reasons.append("URL has an unusually deep subdomain structure")
 
-    if re.search(r"(login|verify|claim|prize|urgent)", url.lower()):
-        score += 1
-        reasons.append("URL contains words sometimes used in deceptive links.")
+    # 8. Suspicious file extensions in path
+    if re.search(r"\.(exe|apk|scr|bat|cmd)(?:$|[?#])", path):
+        score += 3
+        reasons.append("URL path points to a potentially risky executable file")
 
-    if score >= 4:
+    # 9. Avoid treating a normal HTTPS URL as automatically safe
+    if score >= 5:
         risk = "High"
     elif score >= 2:
         risk = "Medium"
@@ -72,7 +85,7 @@ def scan_url(url):
         risk = "Low"
 
     if not reasons:
-        reasons.append("No obvious URL warning signs detected.")
+        reasons.append("No obvious URL warning signs detected")
 
     return {
         "risk": risk,
