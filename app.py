@@ -464,33 +464,76 @@ elif section == "Transaction Risk":
             use_container_width=True,
         )
 
+   
     if submitted:
         reasons = []
         points = 0
 
-        if amount > 50000:
+        # 1. Transaction amount
+        if amount >= 50000:
+            points += 3
+            reasons.append(
+                "Very high transaction amount (₹50,000 or more)."
+            )
+        elif amount >= 20000:
             points += 2
             reasons.append(
-                "Amount exceeds the demonstration threshold of ₹50,000."
+                "Higher-than-usual transaction amount."
             )
-
-        if location_deviation > 100:
-            points += 2
-            reasons.append(
-                "Location deviation exceeds the sample threshold of 100."
-            )
-
-        if frequency > 20:
-            points += 2
-            reasons.append(
-                "Transaction frequency exceeds the sample threshold of 20."
-            )
-
-        if transaction_hour < 5:
+        elif amount >= 10000:
             points += 1
+            reasons.append(
+                "Moderately high transaction amount."
+            )
+
+        # 2. Transaction frequency
+        if frequency > 20:
+            points += 3
+            reasons.append(
+                "Unusually high transaction frequency."
+            )
+        elif frequency > 10:
+            points += 2
+            reasons.append(
+                "Frequent transactions detected."
+            )
+        elif frequency > 5:
+            points += 1
+            reasons.append(
+                "Transaction frequency is elevated."
+            )
+
+        # 3. Location deviation
+        if location_deviation > 100:
+            points += 3
+            reasons.append(
+                "Large deviation from the usual location."
+            )
+        elif location_deviation > 50:
+            points += 2
+            reasons.append(
+                "Unusual transaction location."
+            )
+        elif location_deviation > 20:
+            points += 1
+            reasons.append(
+                "Moderate location deviation."
+            )
+
+        # 4. Transaction time
+        if transaction_hour < 5:
+            points += 2
             reasons.append(
                 "Transaction occurred between midnight and 04:59."
             )
+
+        # Classify the score
+        if points >= 6:
+            risk = "High"
+        elif points >= 3:
+            risk = "Medium"
+        else:
+            risk = "Low"
 
         risk = (
             "High" if points >= 4
