@@ -1,6 +1,7 @@
 
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import joblib
 from pathlib import Path
 from datetime import datetime
@@ -114,13 +115,57 @@ hr {
     color: #9ab0c3;
     font-size: 0.9rem;
 }
+
+/* ===== LARGE, DIRECT-CLICK SIDEBAR NAVIGATION ===== */
+[data-testid="stSidebar"] [data-testid="stRadio"] > div {
+    gap: 9px;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    padding: 10px 12px !important;
+    border-radius: 11px !important;
+    transition: background 0.2s ease, border 0.2s ease;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+    background: #19364d !important;
+    color: #65f0d5 !important;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
+    background: linear-gradient(100deg, #176b72, #2454a5) !important;
+    border: 1px solid #53f0c2 !important;
+    color: #ffffff !important;
+}
+
+/* ===== DISTINCT DASHBOARD HERO ===== */
+.hero.dashboard {
+    background: linear-gradient(120deg, #25145c, #183e78, #087b83) !important;
+    border: 1px solid #55ddeb !important;
+    box-shadow: 0 8px 28px rgba(20, 100, 180, 0.22);
+}
+.hero.dashboard .eyebrow {
+    color: #8af5e5 !important;
+}
+.hero.dashboard h1 {
+    color: #ffffff !important;
+}
+.hero.dashboard p {
+    color: #d5eaff !important;
+}
+
+/* Slightly clearer dashboard panels */
+.panel {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 
-def hero(kicker, title, subtitle):
+def hero(kicker, title, subtitle, theme=""):
+    theme_class = f" {theme}" if theme else ""
     st.markdown(
-        f'<div class="hero">'
+        f'<div class="hero{theme_class}">'
         f'<div class="eyebrow">{kicker}</div>'
         f'<h1>{title}</h1><p>{subtitle}</p></div>',
         unsafe_allow_html=True
@@ -193,7 +238,8 @@ if section == "Dashboard Overview":
         "SECURITY INTELLIGENCE / 01",
         "Your Digital Safety Center",
         "Analyze suspicious messages, links and transaction patterns "
-        "from one professional workspace."
+        "from one professional workspace.",
+        theme="dashboard"
     )
 
     history = pd.DataFrame(get_history(limit=2000))
@@ -249,8 +295,38 @@ if section == "Dashboard Overview":
             chart = pd.DataFrame({
                 "Risk": ["High", "Medium", "Low"],
                 "Scans": [high, medium, low],
-            }).set_index("Risk")
-            st.bar_chart(chart)
+            })
+
+            fig = px.bar(
+                chart,
+                x="Risk",
+                y="Scans",
+                color="Risk",
+                color_discrete_map={
+                    "High": "#FF4B4B",
+                    "Medium": "#FFA726",
+                    "Low": "#00C98D",
+                },
+                text="Scans",
+                title="Risk Overview",
+                category_orders={"Risk": ["High", "Medium", "Low"]},
+            )
+
+            fig.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font_color="#EAF4FF",
+                title_font_size=18,
+                xaxis_title="Risk Category",
+                yaxis_title="Number of Scans",
+                showlegend=False,
+                margin=dict(l=10, r=10, t=55, b=10),
+            )
+            fig.update_traces(
+                textposition="outside",
+                marker_line_width=0,
+            )
+            st.plotly_chart(fig, use_container_width=True)
         else:
             st.info(
                 "Risk charts will appear after you perform your first scan."
