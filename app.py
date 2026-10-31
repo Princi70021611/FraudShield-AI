@@ -89,6 +89,16 @@ hr {
     border-radius: 20px;
     background: linear-gradient(115deg, #10283c, #104044);
     margin-bottom: 22px;
+}/* ===== DASHBOARD HERO COLOUR ===== */
+.hero.dashboard {
+    background: linear-gradient(
+        120deg,
+        #064E3B 0%,
+        #047857 55%,
+        #0F766E 100%
+    ) !important;
+    border: 1px solid #34D399 !important;
+    border-radius: 24px !important;
 }
 /* ===== FRAUDSHIELD DASHBOARD THEME ===== */
 
@@ -165,21 +175,24 @@ hr {
 [data-testid="stSidebar"] [data-testid="stRadio"] > div {
     gap: 9px;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    padding: 10px 12px !important;
-    border-radius: 11px !important;
-    transition: background 0.2s ease, border 0.2s ease;
+/* ===== NAVIGATION STYLE ===== */
+[data-testid="stSidebar"] div[role="radiogroup"] label {
+    font-size: 19px !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+    padding: 13px 14px !important;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
-    background: #19364d !important;
-    color: #65f0d5 !important;
+
+[data-testid="stSidebar"] div[role="radiogroup"] label p,
+[data-testid="stSidebar"] div[role="radiogroup"] label span {
+    font-size: 19px !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
 }
-[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
-    background: linear-gradient(100deg, #176b72, #2454a5) !important;
-    border: 1px solid #53f0c2 !important;
-    color: #ffffff !important;
+
+[data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(90deg, #087F8C, #145DA0) !important;
+    border-radius: 12px !important;
 }
 
 /* ===== DISTINCT DASHBOARD HERO ===== */
@@ -227,16 +240,13 @@ hr {
 """, unsafe_allow_html=True)
 
 
-def hero(kicker, title, subtitle, theme=""):
-    theme_class = f" {theme}" if theme else ""
+def hero(kicker, title, subtitle, theme="default"):
     st.markdown(
-        f'<div class="hero{theme_class}">'
+        f'<div class="hero {theme}">'
         f'<div class="eyebrow">{kicker}</div>'
         f'<h1>{title}</h1><p>{subtitle}</p></div>',
         unsafe_allow_html=True
     )
-
-
 def show_risk(risk):
     risk = str(risk).lower()
 
@@ -300,12 +310,11 @@ with st.sidebar:
 if section == "Dashboard Overview":
 
     hero(
-        "SECURITY INTELLIGENCE / 01",
-        "Your Digital Safety Center",
-        "Analyze suspicious messages, links and transaction patterns "
-        "from one professional workspace.",
-        theme="dashboard"
-    )
+    "SECURITY INTELLIGENCE / 01",
+    "Your Digital Safety Center",
+    "Analyze suspicious messages, links and transaction patterns from one professional workspace.",
+    theme="dashboard"
+)
 
     history = pd.DataFrame(get_history(limit=2000))
 
