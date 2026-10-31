@@ -90,6 +90,51 @@ hr {
     background: linear-gradient(115deg, #10283c, #104044);
     margin-bottom: 22px;
 }
+/* ===== FRAUDSHIELD DASHBOARD THEME ===== */
+
+.hero.dashboard {
+    background: linear-gradient(
+        115deg,
+        #102C46 0%,
+        #075B69 55%,
+        #087F83 100%
+    ) !important;
+
+    border: 1px solid #36DCCB !important;
+    border-radius: 22px !important;
+
+    box-shadow:
+        0 8px 30px rgba(0, 190, 180, 0.16),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.hero.dashboard .eyebrow {
+    color: #64FFE0 !important;
+    font-weight: 800 !important;
+}
+
+.hero.dashboard h1 {
+    color: #FFFFFF !important;
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+}
+
+.hero.dashboard p {
+    color: #D5F3F4 !important;
+    font-size: 1.05rem !important;
+}
+
+/* Dashboard metric cards */
+[data-testid="stMetric"] {
+    background: linear-gradient(
+        145deg,
+        #12334A,
+        #0B263A
+    ) !important;
+    border: 1px solid #247C88 !important;
+    border-radius: 16px !important;
+}
+
 .hero .eyebrow {
     color: #53f0c2;
     font-size: 12px;
@@ -157,7 +202,27 @@ hr {
 .panel {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
+/* BIG AND BOLD SIDEBAR NAVIGATION */
+[data-testid="stSidebar"] div[role="radiogroup"] > label {
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+    padding: 14px 15px !important;
+    border-radius: 12px !important;
+    margin: 6px 0 !important;
+}
 
+[data-testid="stSidebar"] div[role="radiogroup"] > label p,
+[data-testid="stSidebar"] div[role="radiogroup"] > label span {
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    color: #FFFFFF !important;
+}
+
+[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {
+    background: linear-gradient(90deg, #087F8C, #12A6A6) !important;
+    border: 1px solid #35D5CF !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
